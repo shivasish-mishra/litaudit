@@ -11,9 +11,21 @@ OSI Hackathon 2026 project (Bochum hub).
 ```bash
 pip install -r requirements.txt
 python fetch_data.py      # downloads the source databases into data/ (not committed)
-python test_loaders.py
-python loaders.py         # summary of the long table
+python test_loaders.py && python test_audit.py
+python audit.py           # run all checks, print flags + planted-error benchmark
+python figures.py         # figures/litaudit.png
 ```
+Interactive version: `jupyter lab audit.ipynb`.
+
+## How it works
+- `loaders.py`: all databases into one long table (one row per value, normalised composition).
+- `audit.py`: checks (`cross_db`, `relations`), the per-property factor library `FACTORS`,
+  `diagnose` (agree / named factor / unexplained + nearest factor), `planted_benchmark`.
+- `traces.md`: top flags traced to their source papers (Valency MCP Bond + PDFs).
+- `writeup.md`: one-page summary of method and results.
+
+To add a property: load it into the long table, add its known unit factors to `FACTORS`,
+and (optionally) a relation in `relations()`.
 
 ## Data
 | Database | Property | Licence |
