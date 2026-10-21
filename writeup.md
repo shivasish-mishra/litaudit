@@ -1,6 +1,6 @@
 # LitAudit: catching the hidden errors in the databases AI for materials learns from
 
-**Shivasish Mishra** · OSI Hackathon 2026 (Bochum hub) · code: <repo link>
+**Shivasish Mishra** · OSI Hackathon 2026 (Bochum hub) · code: https://github.com/shivasish-mishra/litaudit
 
 **Problem.** Materials ML models are trained on databases built from values copied out of papers. These
 databases carry *structured* errors: unit and quantity mix-ups (S/m stored as S/cm, σT stored as σ,

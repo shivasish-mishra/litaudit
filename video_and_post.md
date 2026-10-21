@@ -50,6 +50,6 @@
 > against the original papers: a ×100 unit error (the case found by hand in a 2026 study), a ≈8× error,
 > and a hardness value the cited paper never reports. Planted unit errors are recovered 94–100% of the time.
 >
-> Literature traced with @Valency MCP Bond. 🎥 video below · 💻 code: <repo link>
+> Literature traced with @Valency MCP Bond. 🎥 video below · 💻 code: https://github.com/shivasish-mishra/litaudit
 >
 > #AIforScience #MaterialsInformatics #LLMHackathon
