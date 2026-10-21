@@ -27,8 +27,8 @@
 
 **2:40–3:30 · Evidence + limits** (panel C)
 > "To measure it, I planted each error type into clean comparisons: conductivity and density unit errors
-> are named correctly 94 to 100 percent of the time; hardness errors are always flagged but named only
-> half the time, because that relation is noisy. Limits: composition can't separate polymorphs, and only
+> are named correctly 94 to 100 percent of the time, including hardness and strength, once the tolerance
+> follows each relation's own noise and the direction of the error. Limits: composition can't separate polymorphs, and only
 > one published case lives in an open database, so most of the numbers come from planted errors."
 
 **3:30–3:55 · Impact**

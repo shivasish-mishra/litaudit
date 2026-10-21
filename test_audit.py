@@ -11,7 +11,13 @@ assert diagnose(-2.97, c) == "mS/cm stored as S/cm (x1000)"
 assert diagnose(math.log10(298), c) == "sigma*T stored as sigma (~x298)"
 assert diagnose(1.6, c) == "unexplained"
 assert nearest(2.16, c).startswith("S/m stored as S/cm (x100), off by 0.16")
-assert diagnose(3.0, "density_exp") == "kg/m3 vs g/cm3 (x1000)"
+assert diagnose(3.0, "density_exp") == "measured kg/m3 stored as g/cm3 (x1000)"
+assert diagnose(-3.0, "density_exp") == "unexplained"  # directed: a kg/m3 slip can only raise the measured value
+# HV-in-MPa (-0.99) and YS-in-ksi (-0.84) are closer than the relation's noise; the stored HV breaks the tie
+assert diagnose(-0.9, "HV_vs_YS", 0.25, ref=300) == "YS: ksi stored as MPa (x6.9)"
+assert diagnose(-0.9, "HV_vs_YS", 0.25, ref=3000) == "HV given in MPa (x9.8)"
+# verified provenance case (YS too HIGH for its HV) must not be blamed on a unit that only lowers YS
+assert diagnose(+0.65, "HV_vs_YS", 0.25, ref=178) == "unexplained"
 
 if (DATA / "liverpool.csv").exists():
     checks = run(__import__("loaders").load_all())
