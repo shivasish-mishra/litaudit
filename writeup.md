@@ -35,6 +35,13 @@ properties (MPEA, 1,545 rows).
 Hardness/yield started at 40–63% with a fixed tolerance; using the relation's own noise, direction and the
 physical HV range raised it to 95–98% without touching the verified cases.
 
+**Scalability.** The audit is a join plus vectorised arithmetic: all 5,357 values and 464 comparisons run in
+seconds on a laptop, and cost grows with the number of matched pairs, not with all pairs. Adding a database is
+one loader into the shared long table; adding a property is one entry of known unit factors (plus, optionally,
+a relation). No retraining, no per-property code. What stops scaling is not compute but evidence: database
+comparisons only exist where databases overlap (128 of ~1,400 conductivity entries here), and tracing a flag
+needs the source paper, which Bond reaches for PubMed/arXiv/ChemRxiv-indexed work but not every older journal.
+
 **Limitations.** Only one real case from the published ground truth (Wang et al.) is in an open database; most numbers
 come from planted errors. Composition matching can't separate polymorphs or processing routes. Bond
 didn't cover older *Solid State Ionics* papers, so those traces needed the PDF. Tolerances come from each

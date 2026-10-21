@@ -11,6 +11,10 @@ source, by reading the original paper. Each flag is checked against the paper it
 | 4 | Li3PS4, Liverpool 1.6e-4 vs OBELiX 2.6e-7 / 8.9e-7 S/cm, resid +2.3 to +2.8, *unexplained* | **Bond:** Liu et al., *JACS* 2013, 10.1021/ja3110895 (880 citations): nanoporous **β**-Li3PS4 raises room-temperature σ **by 3 orders of magnitude** over bulk. Bond also found Yang et al., *ACS AMI* 2016 (10.1021/acsami.6b06754), confirming 1.64e-4 S cm⁻¹ for nanoporous β. | **Not an error: two different phases (nanoporous β vs bulk γ) from the same paper**, stored under one composition. A real limitation: matching by composition alone can't tell polymorphs apart. |
 | 5 | Sm0.52Li0.38TiO2.97, Liverpool 1.5e-3 vs OBELiX 2.0e-7, resid +3.9, *unexplained* | Source 10.1016/0167-2738(94)90310-7 (*Solid State Ionics* 1994). **Not in Bond's corpus**; paper not yet read. A 7,500× gap fits no single factor; ×1000 plus a temperature/phase mismatch is possible. | **Open.** Needs the paper. |
 
+**ChemRxiv re-check (2026-10-21):** Bond added ChemRxiv (57k preprints, 2017 onwards). Re-searching the open
+flags (Sm-Li titanate, Li4B7O12Cl) found only unrelated recent electrolyte preprints; their sources (1977, 1994)
+predate ChemRxiv, so case 5 stays open.
+
 **Bond coverage note:** Bond (PubMed + arXiv + bioRxiv/medRxiv + others) found the *JACS* and *ACS*
 sources instantly but not older *Solid State Ionics* papers (cases 1 and 5). Tracing those needs
 publisher access.
