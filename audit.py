@@ -122,11 +122,21 @@ def run(df):
     return pd.concat([cross_db(df), relations(df)], ignore_index=True)
 
 
-if __name__ == "__main__":
-    from loaders import load_all
-    checks = run(load_all())
-    print(checks.groupby(["check", "diagnosis"]).size().to_string(), "\n")
+def report(checks, top=None):
+    """Plain-text report: counts, flags (largest gap first) with verdict, planted-error benchmark."""
     flags = checks[checks.diagnosis != "agree"].sort_values("resid", key=abs, ascending=False)
-    with pd.option_context("display.width", 200, "display.max_colwidth", 40):
-        print(flags[["check", "composition", "value", "reference", "resid", "diagnosis", "nearest", "doi"]].to_string())
-        print("\n", planted_benchmark(checks).round(2).to_string())
+    lines = [f"{len(checks)} comparisons, {len(flags)} flagged", ""]
+    lines += [f"  {c:<17} {d:<32} {n:>4}" for (c, d), n in checks.groupby(["check", "diagnosis"]).size().items()]
+    lines += ["", f"  {'composition':<26} {'value':>9} {'reference':>9}  {'log gap':>7}  verdict"]
+    for r in flags.head(top).itertuples():
+        verdict = r.diagnosis if r.diagnosis != "unexplained" else f"unexplained (nearest: {r.nearest})"
+        lines.append(f"  {r.composition[:26]:<26} {r.value:9.3g} {r.reference:9.3g}  {r.resid:+7.2f}  {verdict}")
+    lines += ["", "  planted-error benchmark (named correctly):"]
+    lines += [f"  {b.property:<19} {b.factor:<32} {b.recall:4.0%}" for b in planted_benchmark(checks).itertuples()]
+    return "\n".join(lines)
+
+
+if __name__ == "__main__":
+    import sys
+    from loaders import load_all
+    print(report(run(load_all()), top=int(sys.argv[1]) if len(sys.argv) > 1 else None))
