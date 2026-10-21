@@ -102,7 +102,11 @@ def main():
     out = pathlib.Path(__file__).parent / "figures"
     out.mkdir(exist_ok=True)
     fig.savefig(out / "litaudit.png", dpi=200, facecolor="#fcfcfb")
-    print("wrote", out / "litaudit.png")
+    fig.canvas.draw()
+    for ax, name in zip(axes, "abc"):  # single panels, used by the video
+        box = ax.get_tightbbox().transformed(fig.dpi_scale_trans.inverted()).padded(0.1)
+        fig.savefig(out / f"panel_{name}.png", dpi=200, facecolor="#fcfcfb", bbox_inches=box)
+    print("wrote", out / "litaudit.png", "+ panel_a/b/c.png")
 
 
 def pd_concat(*frames):
