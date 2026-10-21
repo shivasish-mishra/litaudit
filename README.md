@@ -33,3 +33,6 @@ and (optionally) a relation in `relations()`.
 | Liverpool Li-ion conductivity (Hargreaves et al., *npj Comput. Mater.* 2023) | σ(T) | Academic use; cite the University of Liverpool. Not redistributed here. |
 | OBELiX (NRC/Mila) | room-temperature σ | CC-BY 4.0 |
 | MPEA (Borg et al., *Sci. Data* 2020) | HV, YS, UTS, E, density | Apache 2.0 |
+
+## Example: a literature query
+`python examples/h_in_al.py` audits reported hydrogen diffusivities in Al (lattice vs trapped-effective vs grain boundary) taken from paper abstracts, using the same `diagnose` with a `diffusivity` unit spec. It compares sources only inside their fitted temperature ranges: at 298 K the DFT and experimental lattice laws differ by exactly 2.0 dex, which naive factor matching would mislabel as a cm2/s vs mm2/s slip, but it is Arrhenius extrapolation.

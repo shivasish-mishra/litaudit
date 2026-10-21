@@ -22,6 +22,7 @@ FACTORS = {
     "YS": {"GPa vs MPa (x1000)": 3, "ksi vs MPa (x6.9)": L(6.895)},
     "UTS": {"GPa vs MPa (x1000)": 3, "ksi vs MPa (x6.9)": L(6.895)},
     "HV": {"HV given in GPa (x102)": L(1 / 0.009807), "HV given in MPa (x9.8)": L(9.807)},
+    "diffusivity": {"cm2/s vs m2/s (x10^4)": 4, "mm2/s vs m2/s (x10^6)": 6, "cm2/s vs mm2/s (x100)": 2},
 }
 # In a physics relation we know which side is which, so a mix-up has a direction: the factor is signed.
 # HV_vs_YS resid = log10(YS / (c*HV*g/3)); density resid = log10(measured / calculated).
