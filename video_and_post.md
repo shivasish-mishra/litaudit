@@ -2,8 +2,9 @@
 
 ## Video
 Built by `../video/make_video.py` (slides + real terminal demo + narration, ≤ 4 min, normal speed); the narration
-text is written to `../video/narration.txt`. Record your own voice per slide into `../video/myvoice/slideNN.*`
-to replace the synthetic one.
+text is written to `../video/narration.txt`. Final version (3 min 24 s): AI narration with Microsoft's neural voice
+`en-US-AndrewNeural` via `edge-tts` (`python make_video.py`; `python make_video.py sapi` for the offline Windows
+voice). Record your own voice per slide into `../video/myvoice/slideNN.*` to replace the synthetic one.
 
 ## Social post (LinkedIn / X)
 
