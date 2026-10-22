@@ -15,7 +15,7 @@ pip install -r requirements.txt
 python fetch_data.py      # downloads the source databases into data/ (not committed)
 python test_loaders.py && python test_audit.py
 python audit.py 30        # all checks, top 30 flags, entry verdicts, coverage, end-to-end benchmark (~1.5 min)
-python figures.py         # figures/litaudit.png, panel_a..d.png, benchmark.csv
+python figures.py         # figures/litaudit.png and benchmark.csv (+ single panels, not tracked)
 ```
 Interactive version: `jupyter lab audit.ipynb`.
 
