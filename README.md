@@ -82,3 +82,7 @@ factor matching would mislabel as a cm²/s vs mm²/s slip, but it is Arrhenius e
 | MPEA (Borg et al., *Sci. Data* 2020) | HV, YS, UTS, E, density | Apache 2.0 |
 
 This project builds on these datasets; all audit code is new.
+
+## Licence
+The code is released under the [MIT licence](LICENSE) (© 2026 Shivasish Mishra). The datasets above are not part of
+this repository and keep their own licences.
