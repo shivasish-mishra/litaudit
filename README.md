@@ -7,6 +7,7 @@ references; disagreements are diagnosed as a named cause, or reported as unexpla
 cause shown. Flags can then be traced to their source papers by an agent workflow.
 
 OSI Hackathon 2026 project (Bochum hub). One-page write-up: [writeup.md](writeup.md); source traces: [traces.md](traces.md).
+Video (3.5 min, LinkedIn): https://lnkd.in/p/edVfuGZh
 
 ## Setup
 ```bash

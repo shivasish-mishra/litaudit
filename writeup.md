@@ -1,6 +1,6 @@
 # LitAudit: catching hidden errors in the databases AI for materials learns from
 
-**Shivasish Mishra** · OSI Hackathon 2026 (Bochum hub) · code: https://github.com/shivasish-mishra/litaudit
+**Shivasish Mishra** · OSI Hackathon 2026 (Bochum hub) · code: https://github.com/shivasish-mishra/litaudit · video: https://lnkd.in/p/edVfuGZh
 
 **Problem.** Many materials ML models are trained on databases of values copied out of papers. Unit and quantity
 slips (S/m stored as S/cm, σT stored as σ, MPa vs GPa) shift a value by a fixed factor yet leave it plausible, so
