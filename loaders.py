@@ -20,11 +20,49 @@ COLUMNS = ["db", "row_id", "doi", "composition", "comp_key", "property",
 ROOM_T_K = 298.15
 
 
+_TOKEN = re.compile(r"\s*(?:([A-Z][a-z]?)|([(\[])|([)\]])|(\d*\.?\d+))")
+
+
+def parse_formula(formula):
+    """Element counts of a formula, honouring (nested) bracket multipliers:
+    '(YPO4)0.8(Li3PO4)0.2' -> Y 0.8, P 1.0, O 4.0, Li 0.6; quotes and spaces are ignored."""
+    s = str(formula).replace('"', "").strip()
+    stack, pos = [Counter()], 0
+    last = None  # what a following number multiplies: an element name or a just-closed group
+    while pos < len(s):
+        m = _TOKEN.match(s, pos)
+        if not m or m.end() == pos:
+            raise ValueError(f"cannot parse formula {formula!r} at {s[pos:]!r}")
+        start, pos = pos, m.end()
+        el, opn, cls, num = m.groups()
+        if el:
+            stack[-1][el] += 1.0
+            last = ("el", el)
+        elif opn:
+            stack.append(Counter())
+            last = None
+        elif cls:
+            group = stack.pop()
+            stack[-1].update(group)
+            last = ("grp", group)
+        else:  # a number multiplies the element or bracket right before it (no space in between)
+            if not last or s[start].isspace():
+                raise ValueError(f"leading coefficient or stray number in formula {formula!r}")
+            n = float(num)
+            if last[0] == "el":
+                stack[-1][last[1]] += n - 1.0
+            else:
+                for k, v in last[1].items():
+                    stack[-1][k] += v * (n - 1.0)
+            last = None
+    if len(stack) != 1:
+        raise ValueError(f"unbalanced brackets in {formula!r}")
+    return stack[0]
+
+
 def comp_key(formula):
-    """'Nd0.25Li0.25TaO3' and 'Nd0.5Li0.5Ta2O6' -> the same key."""
-    counts = Counter()
-    for el, n in re.findall(r"([A-Z][a-z]?)\s*([0-9]*\.?[0-9]*)", str(formula)):
-        counts[el] += float(n) if n not in ("", ".") else 1.0
+    """'Nd0.25Li0.25TaO3' and 'Nd0.5Li0.5Ta2O6' -> the same key; '(YPO4)0.8(Li3PO4)0.2' keeps its ratio."""
+    counts = parse_formula(formula)
     total = sum(counts.values())
     if not total:
         return ""
@@ -39,8 +77,10 @@ def load_liverpool(path=DATA / "liverpool.csv"):
     lines = path.read_text(encoding="utf-8-sig").splitlines()
     start = next(i for i, l in enumerate(lines) if l.startswith("ID,"))  # licence text above the header
     df = pd.read_csv(io.StringIO("\n".join(lines[start:])))
+    # IDs are not unique in the source (922 appears twice): suffix repeats so every entry has its own key
+    row_id = df["ID"].astype(str) + df.groupby("ID").cumcount().map(lambda n: f".{n}" if n else "")
     return pd.DataFrame({
-        "db": "liverpool", "row_id": df["ID"].astype(str), "doi": df["source"].map(_doi),
+        "db": "liverpool", "row_id": row_id, "doi": df["source"].map(_doi),
         "composition": df["composition"], "comp_key": df["composition"].map(comp_key),
         "property": "ionic_conductivity", "value": pd.to_numeric(df["target"], errors="coerce"),
         "unit": "S/cm", "T_K": df["temperature"] + 273.15, "T_assumed": False,
@@ -56,7 +96,8 @@ def load_obelix(path=DATA / "obelix.csv"):
         "property": "ionic_conductivity",
         "value": pd.to_numeric(df["Ionic conductivity (S cm-1)"], errors="coerce"),
         "unit": "S/cm", "T_K": ROOM_T_K, "T_assumed": True,  # OBELiX is room temperature by definition
-        "condition": "",
+        # space group separates polymorphs of one composition (tetragonal vs cubic LLZO differ ~100x)
+        "condition": "SG " + df["Space group number"].astype(str),
     })
 
 

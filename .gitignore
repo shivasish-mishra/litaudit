@@ -1,3 +1,8 @@
 data/
 __pycache__/
 .ipynb_checkpoints/
+*.pkl
+*.parquet
+*.npz
+*.part
+flags.json

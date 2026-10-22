@@ -2,56 +2,61 @@
 
 **Shivasish Mishra** · OSI Hackathon 2026 (Bochum hub) · code: https://github.com/shivasish-mishra/litaudit
 
-**Problem.** Materials ML models are trained on databases built from values copied out of papers. These
-databases carry *structured* errors: unit and quantity mix-ups (S/m stored as S/cm, σT stored as σ,
-MPa vs GPa) that shift a value by a fixed factor yet leave it physically plausible, so ordinary
-outlier filters miss them. Wang et al. (arXiv 2609.01621, 2026) traced one such 100× error into a public
-Li-ion conductivity database *by hand*.
+**Problem.** Materials ML models are trained on databases built from values copied out of papers. These carry
+*structured* errors: unit and quantity mix-ups (S/m stored as S/cm, σT stored as σ, MPa vs GPa, a temperature in
+K under a °C label) that shift a value by a fixed factor yet leave it plausible, so outlier filters miss them.
+Wang et al. (arXiv 2609.01621, 2026) traced one such 100× error into a public Li-ion conductivity database *by hand*.
 
-**What LitAudit does.** For every value it gathers independent references and diagnoses any disagreement:
-1. **Another database**: the same paper and composition (normalised to atom fractions) in a second database, at about the same temperature.
-2. **A physics relation**: hardness vs yield strength (Tabor, calibrated on the data) and measured vs rule-of-mixtures density.
-3. **Diagnosis**: the gap in log space is matched against a per-property library of known factors (×10/×100/×1000, ×≈298 for σT vs σ, ×6.9 ksi, ×9.8/×102 hardness units). The match tolerance is set per check from that check's own scatter (2σ of the agreeing comparisons). In physics relations factors are **directed** (a ksi slip can only lower a yield strength), and a physical range breaks ties (no alloy has HV > 1500, so such a number must be MPa). Output: *agree*, a *named factor*, or *unexplained* plus the nearest factor and how far off it is. No auto-relabelling.
-4. **Trace**: flagged entries are traced to their source with **Valency MCP Bond** or by reading the paper.
+**What LitAudit does.** Four automatic checks compare values with independent references; a fifth, agent-driven
+step traces flags to their sources.
+1. **Two databases**: the same paper + composition in a second database (symmetric: either side may be wrong).
+2. **Temperature series**: each point of a paper's Arrhenius series vs its neighbours (a removal test pins the culprit).
+3. **Other papers**: the median of other papers reporting the same composition and condition (pins the entry when ≥ 3 papers report it).
+4. **Physics**: hardness vs yield strength (Tabor), measured vs calculated density.
+5. **Agents** (Claude Code workflow): one agent per flag finds the source through **Valency MCP Bond** and OpenAlex,
+   quotes what it reports and judges *database error / physical difference / unclear*; an independent skeptic
+   re-fetches the source, checks the quote verbatim and tries to refute the verdict.
 
-Adding a property means adding its units and relations; the code is unchanged. Shown on two unrelated
-domains: Li-ion conductivity (Liverpool, 820 entries; OBELiX, 599) and high-entropy-alloy mechanical
-properties (MPEA, 1,545 rows).
+The agreement band and factor tolerance come from each check's own scatter σ (band max(0.3, 3σ) dex, tolerance 2σ).
+A gap is matched to a library of known factors; a check too noisy to resolve them (papers vs papers for conductivity,
+σ ≈ 0.6 dex) flags but never names a cause. Factors in physics relations are signed (a ksi slip can only *lower* a
+yield strength). Shown on two unrelated domains: Li-ion conductivity (Liverpool 820 entries, OBELiX 599) and
+high-entropy-alloy mechanics (MPEA 1,545 rows).
 
 ![LitAudit figure](figures/litaudit.png)
-*A: 128 entries present in both conductivity databases; 110 agree within 0.3 dex. B: hardness vs yield strength for 224 alloys. C: planted unit errors recovered by name (every planted error was flagged).*
+*A: 203 matched pairs between the two conductivity databases. B: hardness vs yield strength. C: planted errors,
+whole audit re-run. D: the Arrhenius check on a real series with a planted ×100 slip.*
 
-**Results.** 464 comparisons; 35 flagged. Every flag we checked against the original paper was explained:
+**Results.** 1,663 comparisons, 119 flagged. Coverage: 51% of conductivity values have at least one reference (28% from
+the database comparison alone); for the alloys 11–47% per property (measured density 100%). Overall only 37% of the
+5,357 stored values have any reference, so most are still unchecked. **Planted errors** (stored values corrupted, whole audit re-run): conductivity slips are flagged
+**76–94%** of the time, hardness/strength/density slips **98–100%**; the cause is named alone for 71–94%; 0.3–1.1% of
+clean entries become false flags.
 
-| Flag | Original paper says | Verdict |
-|---|---|---|
-| Nd₀.₂₅Li₀.₂₅TaO₃: Liverpool 1.9×10⁻⁶ vs OBELiX 1.3×10⁻⁸ S/cm (nearest factor: ×100) | σ reported in **S/m**; room-temperature value ≈10⁻⁸ S/cm | **Liverpool ×100 error** (S/m stored as S/cm). Same case as Wang et al., found automatically |
-| Te-doped LLZO (2 entries): Liverpool ≈10× below OBELiX | Table 2 matches OBELiX exactly | **Liverpool error**, ≈7–9× (cause unknown; "×10" label is a near-miss) |
-| AlCoCrFeNiTi₀.₅: YS 2260 MPa with HV 178 | YS 2.26 GPa; **no hardness reported** | **MPEA provenance error**: value not in the cited source |
-| Li₃PS₄: Liverpool 1.6×10⁻⁴ vs OBELiX ≈10⁻⁷ S/cm (Bond trace) | Nanoporous β-phase is 1000× more conductive than bulk γ | **Not an error**: two phases under one composition (a limitation, correctly left "unexplained") |
+**Real data, checked against the sources.** 18 flags were traced (7 by hand from the papers and Bond, 11 more only by
+the agents). 8 could be settled:
+| Verdict | Flags |
+|---|---|
+| **Database error (5)** | Nd tantalate: Liverpool stored S/m as S/cm (the case Wang et al. found by hand; the tool flagged it, nearest factor ×100) · Te-LLZO ×2: Liverpool 9.5× and 8.7× below the paper's table at the same 30 °C · AlCoCrFeNiTi₀.₅: hardness not in the cited paper · **new, found by the agents**: Li₅PS₄(BH₄)₂, Liverpool 7.96×10⁻³ vs the abstract's "1.8 × 10⁻³ S cm⁻¹ at 25 °C" (= OBELiX) |
+| **Physical difference (3)** | Li₃PS₄ ×2: nanoporous β vs bulk phase · LLZO: tetragonal vs cubic (abstract: "about two orders of magnitude lower") |
 
-**Planted-error benchmark** (each factor injected into agreeing comparisons): every one of the 9 error types
-(conductivity, hardness/yield-strength and density units) is named correctly **94–100%** of the time.
-Hardness/yield started at 40–63% with a fixed tolerance; using the relation's own noise, direction and the
-physical HV range raised it to 95–98% without touching the verified cases.
+One more is likely physical (Ta-LLZO: the databases recorded different temperatures, 25 vs 34 °C). The other 9 stay
+open: their source is closed (51 of the 75 flagged papers have no open abstract) or its abstract gives no number for
+that sample. So **5 of 8 settled flags were real database errors**; the rest was physics that composition alone cannot
+separate. **Named causes are unconfirmed on real data**: the Te-LLZO "×10" fits the size of the gap but not the
+digits (1.07 vs 1.02), and the agents argue a named "×10" Arrhenius flag is a superionic jump near melting.
 
-**Scalability.** The audit is a join plus vectorised arithmetic: all 5,357 values and 464 comparisons run in
-seconds on a laptop, and cost grows with the number of matched pairs, not with all pairs. Adding a database is
-one loader into the shared long table; adding a property is one entry of known unit factors (plus, optionally,
-a relation). No retraining, no per-property code. What stops scaling is not compute but evidence: database
-comparisons only exist where databases overlap (128 of ~1,400 conductivity entries here), and tracing a flag
-needs the source paper, which Bond reaches for PubMed/arXiv/ChemRxiv-indexed work but not every older journal.
+**Scalability.** All four checks run in under a second on 5,357 values (the benchmark re-runs them ~30 times).
+Adding a database is one loader; adding a property is one entry of known unit factors, optionally a relation or a
+series law. What stops scaling is evidence, not compute: overlap between sources, and open text to settle a flag.
 
-**Limitations.** Only one real case from the published ground truth (Wang et al.) is in an open database; most numbers
-come from planted errors. Composition matching can't separate polymorphs or processing routes. Bond
-didn't cover older *Solid State Ionics* papers, so those traces needed the PDF. Tolerances come from each
-check's own scatter, not from the verified cases; the Nd case stays "unexplained" (0.16 off the ×100 factor, while the
-database comparison allows 0.10) rather than being forced.
+**Limitations.** Composition alone cannot separate polymorphs or processing (OBELiX space groups help, Liverpool has
+none); attribution is weak when only two values exist; Bond held few of these older sources, so most agent evidence
+came from OpenAlex abstracts; most published ground truth sits in closed papers.
 
-**Impact.** Literature-derived databases are infrastructure for AI-driven materials discovery. LitAudit gives
-curators and model builders a cheap, explainable audit: *which* entries disagree, *why* (when a known
-factor fits), and *where to look* (the source). It found three real errors in one morning in two public
-databases, and the same code applies to any property with known units and relations.
+**Impact.** Literature databases are infrastructure for AI-driven discovery. LitAudit tells curators and model builders
+*which* entries disagree, *whether a fixed-factor slip explains it*, and *what the source says*, and it says
+"unexplained" or "unclear" rather than guess.
 
-*Data: Liverpool Li-ion database (Hargreaves et al. 2023, academic licence, not redistributed), OBELiX
-(CC-BY 4.0), MPEA (Borg et al. 2020, Apache 2.0). Builds on those datasets; all audit code is new.*
+*Data: Liverpool (Hargreaves et al. 2023, academic licence, not redistributed), OBELiX (CC-BY 4.0), MPEA (Borg et al. 2020,
+Apache 2.0). Builds on those datasets; all audit code is new. Source traces: `traces.md`, `traces_agent.json`.*
