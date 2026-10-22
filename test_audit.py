@@ -97,7 +97,7 @@ assert diagnose(+0.65, "HV_vs_YS", 0.25, ref=178) == "unexplained"
 
 if (DATA / "liverpool.csv").exists():
     checks = run(__import__("loaders").load_all())
-    # verified against the papers (see litaudit_pitch_and_plan.md): all three must be flagged
+    # verified against the papers (see traces.md): all three must be flagged
     for doi in ("10.1016/s0167-2738(98)00414-7", "10.1016/j.jpowsour.2013.03.166", "10.1063/1.2734517"):
         assert (checks[checks.doi == doi].diagnosis != "agree").any(), doi
     nd = checks[(checks.doi == "10.1016/s0167-2738(98)00414-7") & (checks.composition == "Nd0.25Li0.25TaO3")]

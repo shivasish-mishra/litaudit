@@ -12,7 +12,7 @@ SOURCES = {  # name: (url, md5 of the version used for the results; a mismatch r
     # OBELiX (NRC/Mila), CC-BY 4.0.
     "obelix.csv": ("https://raw.githubusercontent.com/NRC-Mila/OBELiX/main/data/processed.csv",
                    "3402dfdfa8e1d75e68f42d87ebd24e6f"),
-    # Borg et al., Sci. Data 7, 368 (2020), Apache 2.0.
+    # Borg et al., Sci. Data 7, 430 (2020), Apache 2.0.
     "mpea.csv": ("https://raw.githubusercontent.com/CitrineInformatics/MPEA_dataset/master/MPEA_dataset.csv",
                  "6d29eb6018157b863ca0033ccec936d5"),
 }

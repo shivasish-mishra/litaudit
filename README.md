@@ -2,11 +2,11 @@
 
 Audits literature-derived materials databases for structured errors: unit and quantity mix-ups that
 shift a value by a fixed factor (S/m stored as S/cm, σT stored as σ, MPa vs GPa, a temperature in K
-under a °C label) and values missing from their cited source. Each value is compared with independent
+under a °C label). Tracing flags to their sources can also expose values that are not in the cited paper. Each value is compared with independent
 references; disagreements are diagnosed as a named cause, or reported as unexplained with the nearest
 cause shown. Flags can then be traced to their source papers by an agent workflow.
 
-OSI Hackathon 2026 project (Bochum hub).
+OSI Hackathon 2026 project (Bochum hub). One-page write-up: [writeup.md](writeup.md); source traces: [traces.md](traces.md).
 
 ## Setup
 ```bash
@@ -24,7 +24,7 @@ Four automatic checks (`audit.py`), each producing comparisons `log10(value / re
 | Check | Reference | Who is to blame |
 |---|---|---|
 | `cross_db` | the same paper + composition in a second database | symmetric (either side) |
-| `arrhenius` | the same paper's temperature series: each point vs its neighbours in log σT–1/T (interpolation; end points by a local line, capped at 2 neighbour spacings) | the point, via a removal test (series of ≥ 4 temperatures) |
+| `arrhenius` | the same paper's temperature series: each point vs its neighbours in log σT vs 1/T (interpolation; end points by a local line, capped at 2 neighbour spacings) | the point, via a removal test (series of ≥ 4 temperatures) |
 | `cross_paper` | each entry vs the median of other papers' medians for the same composition and condition (OBELiX: space group; MPEA: processing, plus test type for strength) in one database | the entry, when ≥ 3 papers report it |
 | `relations` | physics: hardness vs yield strength (Tabor, calibrated on the data), measured vs calculated density | symmetric |
 
@@ -37,18 +37,20 @@ Four automatic checks (`audit.py`), each producing comparisons `log10(value / re
 - **Entry verdicts** (`entry_verdicts`): all checks combined per database entry → *suspect*, *ambiguous*, *clean*.
   A symmetric disagreement is pinned on one side only if the other side alone is confirmed: it passes an
   attributable check against other sources whose band is narrower than the gap (its own series cannot confirm scale).
-- **Benchmark** (`planted_benchmark`): corrupt stored values with each factor, re-run the whole audit, measure
+- **Benchmark** (`planted_benchmark`): corrupt stored values with each of the 9 factors in `PLANT` (the temperature slip and UTS factors are not
+  benchmarked), re-run the whole audit, measure
   flagged / named / pinned and the collateral false-flag rate.
 
 ## Literature tracing (agents)
-`python audit.py` writes `flags.json` (every flag, ids F000…). `python prescreen.py` fetches OpenAlex abstracts and
+`python audit.py` writes `flags.json` (every flag, with stable ids such as
+`cross_db/liverpool:615:ionic_conductivity/obelix:il5`). `python prescreen.py` fetches OpenAlex abstracts and
 writes `data/trace_todo.json`: the flags whose source abstract states a value in a matching unit (10 of 119 today;
 24 of the 75 flagged papers have an open abstract). `trace_flags.workflow.js` is a Claude Code workflow: one agent
 per flag finds the source through **Valency MCP Bond** (PubMed, arXiv, ChemRxiv…) and the OpenAlex API, quotes what
 the source reports and judges *database error / physical difference / unclear*; an independent skeptic re-retrieves
 the source, checks the quote verbatim and tries to refute the verdict. Run it from Claude Code with the Workflow tool,
-`args: {ids: [...]}` (the ids from `trace_todo.json`); it reads `flags.json` from the hard-coded path in `FLAGS`, so
-edit that line for your checkout. Results: `traces.md`, `traces_agent.json`.
+`args: {ids: [...]}` (the ids from `trace_todo.json`); it reads `flags.json` from `args.flags` (default: the path in `FLAGS`).
+The Bond tool names in `TOOLS` carry this author's connector id (`34b41fbe-…`); replace it with your own. Results: `traces.md`, `traces_agent.json`.
 
 ## Which properties can be audited? (scope and limits)
 Any **scalar, numeric property with units** works, if it has **at least one independent reference**:
@@ -57,7 +59,7 @@ Any **scalar, numeric property with units** works, if it has **at least one inde
 |---|---|---|
 | Known unit / quantity confusions | the factor library is what names a cause | add them to `FACTORS` (one line); without any, LitAudit can still flag but not name |
 | A second report or a law it must obey | nothing to compare a single value with | only plausibility ranges are possible (not yet implemented) |
-| The conditions that change it (T, phase, test type, processing) | otherwise real differences look like errors (tetragonal vs cubic LLZO ≈ ×100) | put them in `condition`; noisier groups flag but do not name |
+| The conditions that change it (T, phase, test type, processing) | otherwise real differences look like errors (tetragonal vs cubic LLZO ≈ ×100) | put them in `condition` (used by `arrhenius` and `cross_paper`; `cross_db` matches paper + composition only) |
 | Log-scale behaviour | gaps are judged as ratios | for signed or near-zero quantities (Seebeck coefficient, formation energy) use differences instead of ratios — not yet implemented |
 
 Not suited as is: categorical properties (crystal structure, phase labels), tensors without orientation metadata,
